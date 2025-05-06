@@ -1,8 +1,10 @@
 sources:
 
-  - name: sql_server_dbo # name of the source 
-    schema: sql_server_dbo # this is the schema our raw data lives in
-    database: ALUMNO26_DEV_BRONZE_DB # this is the name of our database
+  - name: sql_server_dbo 
+    description: >
+      Datos transaccionales provenientes del sistema SQL Server original.
+    schema: sql_server_dbo 
+    database: ALUMNO26_DEV_BRONZE_DB 
 
     quoting:
       database: false
@@ -15,9 +17,10 @@ sources:
 
     tables:
       - name: addresses
+        description: >
+          Direcciones asociadas a usuarios y pedidos.
         columns:
           - name: address_id
-            data_type: varchar
             tests:
               - unique
               - not_null
@@ -35,6 +38,8 @@ sources:
             data_type: timestamp_tz
 
       - name: events
+        description: >
+          Eventos de interacción de los usuarios en la plataforma (clics, vistas, etc.).
         columns:
           - name: event_id
             data_type: varchar
@@ -61,6 +66,8 @@ sources:
             data_type: timestamp_tz
 
       - name: order_items
+        description: >
+          Detalle de productos incluidos en cada pedido.
         columns:
           - name: order_id
             data_type: varchar
@@ -78,6 +85,8 @@ sources:
             data_type: timestamp_tz
 
       - name: orders
+        description: >
+          Pedidos realizados por los usuarios.
         columns:
           - name: order_id
             data_type: varchar
@@ -114,6 +123,8 @@ sources:
             data_type: timestamp_tz
 
       - name: products
+        description: >
+          Productos disponibles en la plataforma.
         columns:
           - name: product_id
             data_type: varchar
@@ -132,6 +143,8 @@ sources:
             data_type: timestamp_tz
 
       - name: promos
+        description: >
+          Promociones aplicables a los pedidos.
         columns:
           - name: promo_id
             data_type: varchar
@@ -148,6 +161,8 @@ sources:
             data_type: timestamp_tz
 
       - name: users
+        description: >
+          Usuarios registrados en la plataforma.
         columns:
           - name: user_id
             data_type: varchar

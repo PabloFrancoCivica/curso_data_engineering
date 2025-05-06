@@ -1,8 +1,10 @@
 sources:
 
-  - name: google_sheets # name of the source 
-    schema: google_sheets # this is the schema our raw data lives in
-    database: ALUMNO26_DEV_BRONZE_DB # this is the name of our database
+  - name: google_sheets
+    description: >
+      Datos cargados desde Google Sheets, utilizados como fuente externa de presupuestos mensuales.
+    schema: google_sheets
+    database: ALUMNO26_DEV_BRONZE_DB
 
     quoting:
       database: false
@@ -14,15 +16,39 @@ sources:
       #error_after: {count: 48, period: hour}
 
     tables:
-
       - name: budget
+        description: >
+          Presupuestos mensuales estimados por producto.
         loaded_at_field: _fivetran_synced
         columns:
           - name: _row
+            description: >
+              Clave primaria técnica de la fila en Google Sheets.
             tests:
               - unique
               - not_null
+
           - name: product_id
+            description: >
+              Identificador del producto presupuestado.
+            tests:
+              - not_null
+
           - name: quantity
+            description: >
+              Cantidad presupuestada del producto para ese mes.
+            tests:
+              - not_null
+              - positive_values 
+
           - name: month
+            description: >
+              Mes correspondiente al presupuesto.
+            tests:
+              - not_null
+
           - name: _fivetran_synced
+            description: >
+              Fecha de sincronización del dato mediante Fivetran.
+            tests:
+              - not_null

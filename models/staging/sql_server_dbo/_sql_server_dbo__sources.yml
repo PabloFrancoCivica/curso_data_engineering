@@ -1,191 +1,212 @@
-sources:
+version: 2
 
+sources:
   - name: sql_server_dbo 
     description: >
-      Datos transaccionales provenientes del sistema SQL Server original.
+      Fuente principal del sistema operacional obtenida desde SQL Server mediante Fivetran. 
+      Contiene datos en crudo (raw) correspondientes a usuarios, órdenes, productos, eventos y promociones.
+
     schema: sql_server_dbo 
     database: ALUMNO26_DEV_BRONZE_DB 
 
     quoting:
-      database: false
+      database: false 
       schema: false
       identifier: false
 
     freshness:
-      warn_after: {count: 1000, period: day}
+      warn_after: {count: 2422222, period: day} 
       #error_after: {count: 48, period: hour}
 
     tables:
       - name: addresses
-        description: >
-          Direcciones asociadas a usuarios y pedidos.
+        description: "Tabla con información sobre las direcciones físicas de clientes y usuarios."
         columns:
           - name: address_id
+            description: "Clave única para cada dirección."
             tests:
               - unique
               - not_null
           - name: zipcode
-            data_type: number
+            description: "Código postal correspondiente a la dirección."
+            tests:
+              - dbt_expectations.expect_column_values_to_match_regex:
+                  regex: '^\d{5}$'
+                  severity: warn
           - name: country
-            data_type: varchar
+            description: "País asociado a la dirección."
           - name: address
-            data_type: varchar
+            description: "Dirección física completa."
           - name: state
-            data_type: varchar
+            description: "Estado o región de la dirección."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Indicador booleano de si el registro fue eliminado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Timestamp de última sincronización por Fivetran."
 
       - name: events
-        description: >
-          Eventos de interacción de los usuarios en la plataforma (clics, vistas, etc.).
+        description: "Registro de eventos generados por interacciones de usuarios."
         columns:
           - name: event_id
-            data_type: varchar
+            description: "Identificador único para cada evento."
             tests:
               - unique
               - not_null
           - name: page_url
-            data_type: varchar
+            description: "URL específica donde ocurrió el evento."
           - name: event_type
-            data_type: varchar
+            description: "Tipo de evento ocurrido (ejemplo: click, view)."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['add_to_cart', 'checkout', 'package_shipped', 'page_view']
           - name: user_id
-            data_type: varchar
+            description: "ID del usuario que generó el evento."
           - name: product_id
-            data_type: varchar
+            description: "Producto asociado al evento (si aplica)."
           - name: session_id
-            data_type: varchar
+            description: "ID de sesión del usuario."
           - name: created_at
-            data_type: timestamp_ntz
+            description: "Timestamp en que ocurrió el evento."
           - name: order_id
-            data_type: varchar
+            description: "Orden asociada al evento (si aplica)."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."
 
       - name: order_items
-        description: >
-          Detalle de productos incluidos en cada pedido.
+        description: "Detalles de cada ítem incluido en las órdenes."
         columns:
           - name: order_id
-            data_type: varchar
+            description: "Identificador de la orden asociada."
             tests:
               - not_null
           - name: product_id
-            data_type: varchar
+            description: "Producto comprado en la orden."
             tests:
               - not_null
           - name: quantity
-            data_type: number
+            tests:
+              - positive_values
+            description: "Cantidad del producto comprada."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."
 
       - name: orders
-        description: >
-          Pedidos realizados por los usuarios.
+        description: "Tabla que registra todas las órdenes realizadas por los usuarios."
         columns:
           - name: order_id
-            data_type: varchar
+            description: "Identificador único de la orden."
             tests:
               - unique
               - not_null
           - name: shipping_service
-            data_type: varchar
+            description: "Servicio utilizado para el envío."
           - name: shipping_cost
-            data_type: float
+            description: "Costo del envío en USD."
+            tests:
+              - positive_values
           - name: address_id
-            data_type: varchar
+            description: "ID de la dirección donde se envía la orden."
           - name: created_at
-            data_type: timestamp_tz
+            description: "Fecha y hora en que se creó la orden."
           - name: promo_id
-            data_type: varchar
+            description: "Código promocional aplicado a la orden (si existe)."
           - name: estimated_delivery_at
-            data_type: timestamp_tz
+            description: "Fecha estimada para la entrega."
           - name: order_cost
-            data_type: float
+            description: "Costo total de productos antes de descuentos."
+            tests:
+              - positive_values
           - name: user_id
-            data_type: varchar
+            description: "Usuario que generó la orden."
           - name: order_total
-            data_type: float
+            description: "Costo total final tras descuentos y envío."
           - name: delivered_at
-            data_type: timestamp_tz
+            description: "Fecha real de entrega de la orden."
           - name: tracking_id
-            data_type: varchar
+            description: "Código para rastrear la entrega."
           - name: status
-            data_type: varchar
+            description: "Estado actual de la orden (ej. Entregada, En camino)."
+            tests:
+              - accepted_values:
+                  values: ['delivered', 'preparing', 'shipped']
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."
 
       - name: products
-        description: >
-          Productos disponibles en la plataforma.
+        description: "Información básica de los productos disponibles."
         columns:
           - name: product_id
-            data_type: varchar
+            description: "Clave única del producto."
             tests:
               - unique
               - not_null
           - name: price
-            data_type: float
+            description: "Precio actual del producto en USD."
+            tests:
+              - positive_values
           - name: name
-            data_type: varchar
+            description: "Nombre descriptivo del producto."
           - name: inventory
-            data_type: number
+            description: "Inventario disponible del producto."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."
 
       - name: promos
-        description: >
-          Promociones aplicables a los pedidos.
+        description: "Datos de promociones y descuentos."
         columns:
           - name: promo_id
-            data_type: varchar
+            description: "Clave única de la promoción."
             tests:
               - unique
               - not_null
           - name: discount
-            data_type: number
+            description: "Porcentaje o monto de descuento aplicado."
+            tests:
+              - positive_values
           - name: status
-            data_type: varchar
+            tests:
+              - accepted_values:
+                  values: ['inactive', 'active']
+            description: "Estado de la promoción (activa, inactiva)."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."
 
       - name: users
-        description: >
-          Usuarios registrados en la plataforma.
+        description: "Tabla con datos personales y de contacto de los usuarios."
         columns:
           - name: user_id
-            data_type: varchar
+            description: "Identificador único del usuario."
             tests:
               - unique
               - not_null
           - name: updated_at
-            data_type: timestamp_tz
+            description: "Fecha de última actualización del registro."
           - name: address_id
-            data_type: varchar
+            description: "Dirección física asociada al usuario."
           - name: last_name
-            data_type: varchar
+            description: "Apellido del usuario."
           - name: created_at
-            data_type: timestamp_tz
+            description: "Fecha de creación del usuario."
           - name: phone_number
-            data_type: varchar
+            description: "Teléfono de contacto."
           - name: total_orders
-            data_type: number
+            description: "Total acumulado de órdenes realizadas por el usuario."
           - name: first_name
-            data_type: varchar
+            description: "Nombre del usuario."
           - name: email
-            data_type: varchar
+            description: "Correo electrónico del usuario."
           - name: _fivetran_deleted
-            data_type: boolean
+            description: "Registro borrado en origen."
           - name: _fivetran_synced
-            data_type: timestamp_tz
+            description: "Última sincronización con origen."

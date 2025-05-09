@@ -1,0 +1,119 @@
+models:
+  - name: int_order_line_allocations
+    description: ""
+    columns:
+      - name: quantity
+        data_type: number
+        description: ""
+
+      - name: order_id
+        data_type: varchar
+        description: ""
+
+      - name: user_id
+        data_type: varchar
+        description: ""
+
+      - name: address_id
+        data_type: varchar
+        description: ""
+
+      - name: promo_id
+        data_type: varchar
+        description: ""
+
+      - name: order_cost
+        data_type: float
+        description: ""
+
+      - name: order_total
+        data_type: float
+        description: ""
+
+      - name: shipping_cost
+        data_type: float
+        description: ""
+
+      - name: shipping_service
+        data_type: varchar
+        description: ""
+
+      - name: created_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: created_at_fecha
+        data_type: date
+        description: ""
+
+      - name: created_at_time
+        data_type: varchar
+        description: ""
+
+      - name: estimated_delivery_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: estimated_delivery_at_fecha
+        data_type: date
+        description: ""
+
+      - name: delivered_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: delivered_at_fecha
+        data_type: date
+        description: ""
+
+      - name: tracking_id
+        data_type: varchar
+        description: ""
+
+      - name: status
+        data_type: varchar
+        description: ""
+
+      - name: _fivetran_synced
+        data_type: timestamp_tz
+        description: ""
+
+      - name: product_id
+        data_type: varchar
+        description: ""
+
+      - name: price
+        data_type: float
+        description: ""
+
+      - name: weight_kg
+        data_type: float
+        description: ""
+
+      - name: line_total
+        data_type: float
+        description: ""
+
+      - name: line_weight
+        data_type: float
+        description: ""
+
+      - name: promo_discount
+        data_type: float
+        description: ""
+
+      - name: proporcion_productos
+        data_type: number
+        description: ""
+
+      - name: proporcion_peso
+        data_type: float
+        description: ""
+
+      - name: promo_discount_allocated
+        data_type: float
+        description: ""
+
+      - name: shipping_cost_allocated
+        data_type: float
+        description: ""

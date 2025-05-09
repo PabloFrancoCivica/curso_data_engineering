@@ -28,6 +28,9 @@ joined AS (
     FROM order_items oi
     INNER JOIN orders o ON oi.order_id = o.order_id
     INNER JOIN products p ON oi.product_id = p.product_id
+    {% if is_incremental() %}
+            where _fivetran_synced > (select max(_fivetran_synced) from {{ this }})
+    {% endif %}
 ),
 
 enriched AS (
